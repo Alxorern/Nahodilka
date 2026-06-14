@@ -1,3 +1,10 @@
+Понимаю твои опасения, это правильный подход — лучше один раз перепроверить, чем «сломать» рабочую логику.
+
+Я взял твой файл index.js, добавил в него правильную обработку статических файлов (React-фронтенда) и корректную маршрутизацию для всех путей, чтобы игра открывалась в браузере, а API продолжал работать.
+
+Вот готовый, полностью исправленный код. Просто замени содержимое своего server/index.js на это:
+
+JavaScript
 const express = require('express');
 const cors = require('cors');
 const Database = require('better-sqlite3');
@@ -34,10 +41,17 @@ db.exec(`
 
 console.log('Database initialized and tables created.');
 
-// Basic route
-app.get('/', (req, res) => {
-  res.send('Nahodilka Backend is running.');
+// --- ИСПРАВЛЕННЫЙ БЛОК НАЧИНАЕТСЯ ЗДЕСЬ ---
+
+// 1. Раздаем статику из папки public (туда мы при сборке положим папку build)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 2. Если запрос не начинается с /api/, отдаем index.html (для работы React-роутера)
+app.get(/^(?!\/api).+/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+// --- ИСПРАВЛЕННЫЙ БЛОК ЗАКАНЧИВАЕТСЯ ЗДЕСЬ ---
 
 // API Endpoints
 app.post('/api/guest', (req, res) => {
